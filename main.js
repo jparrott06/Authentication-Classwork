@@ -1,5 +1,9 @@
 "use strict";
 
+// const { db } = require("./models/user");
+
+ //const { connect } = require("mongodb");
+
 const express = require("express"), 
 app = express(),
 router = express.Router(),
@@ -10,10 +14,24 @@ mongoose = require("mongoose"),
 methodOverride = require("method-override"),
 subscribersController = require("./controllers/subscribersController"),
 usersController = require("./controllers/usersController"),
-coursesController = require("./controllers/coursesController");
+coursesController = require("./controllers/coursesController"),
+passport = require("passport"),
+cookieParser = require("cookie-parser"),
+expressSession = require("express-session"),
+expressValidator = require("express-validator"),
+connectFlash = require("connect-flash"),
+User = require("./models/user");
+
+mongoose.Promise = global.Promise;
 
 mongoose.connect("mongodb://localhost:27017/confetti_cuisine", {useNewUrlParser: true});
 mongoose.set("useCreateIndex", true);
+
+const db = mongoose.connection;
+
+db.once("open", () => {
+    console.log("Successfully connected to MongoDB using Mongoose!");
+});
 
 
 app.set("port", process.env.PORT || 3000);
@@ -21,6 +39,7 @@ app.set("view engine", "ejs");
 
 router.use(express.static("public"));
 router.use(layouts);
+router.use(expressValidator());
 router.use(
     express.urlencoded({
         extended: false
@@ -31,6 +50,30 @@ router.use(methodOverride("_method", {methods: ['POST', 'GET']}));
 
 router.use(express.json());
 
+router.use(cookieParser("my_passcode"));
+router.use(expressSession({
+    secret: "my_passcode",
+    cookie: {
+        maxAge: 360000
+    },
+    resave: false,
+    saveUninitialized: false
+}));
+
+
+router.use(passport.initialize());
+router.use(passport.session());
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+router.use(connectFlash());
+
+router.use((req, res, next) => {
+    res.locals.flashMessages = req.flash();
+    res.locals.loggedIn = req.isAuthenticated();
+    res.locals.currentUser = req.user;
+    next();
+})
 
 router.get("/", homeController.index);
 //router.get("/contact", homeController.contact);
@@ -45,10 +88,15 @@ router.delete("/subscribers/:id/delete", subscribersController.delete, subscribe
 
 router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
-router.post("/users/create", usersController.create, usersController.redirectView);
+router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
+
+router.get("/users/login", usersController.login);
+router.post("/users/login", usersController.authenticate);
+router.get("/users/logout", usersController.logout, usersController.redirectView);
+
 router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit", usersController.edit);
-router.put("/users/:id/update", usersController.update, usersController.redirectView);
+router.put("/users/:id/update", usersController.validate ,usersController.update, usersController.redirectView);
 router.delete("/users/:id/delete", usersController.delete, usersController.redirectView);
 
 router.get("/courses", coursesController.index, coursesController.indexView);
