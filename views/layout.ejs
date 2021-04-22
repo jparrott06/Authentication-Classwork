@@ -4,8 +4,13 @@
 <head>
     <title>Confetti Cuisine</title>
     <link rel="stylesheet" href="/css/confetti_cuisine.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8, maximum-scale=1">
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/js/confettiCuisine.js"></script>
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="/css/bootstrap.css">
 </head>
 
 <body>
@@ -18,6 +23,7 @@
             <a href="/courses"><span class="button">Courses</span></a>
             <a href="/subscribers"><span class="button">Contact</span></a>
             <a href="/users"><span class="button">Users</span></a>
+            <%- include('courses/_coursesModal') %>
         </div>
     </div>
 
@@ -53,5 +59,4 @@
         <%- body%>
     </div>
 </body>
-
 </html>
